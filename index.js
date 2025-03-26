@@ -8,6 +8,9 @@ app.use('/judgement_font', express.static('judgement_font'));
 const indexRoute = require('./routes/index');
 app.use('/', indexRoute);
 
+const uploadRoute = require('./routes/upload');
+app.use('/upload', uploadRoute);
+
 app.use((req, res) => {
     res.status(404).send('Sorry, this page does not exist.');
 });
