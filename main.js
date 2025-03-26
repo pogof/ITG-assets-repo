@@ -5,8 +5,14 @@ const port = 3000;
 // Serve static files from the judgement_font directory
 app.use('/judgement_font', express.static('judgement_font'));
 
+// Serve static files from the css directory
+app.use('/css', express.static('css'));
+
 const indexRoute = require('./routes/index');
 app.use('/', indexRoute);
+
+const judgementFontsRoute = require('./routes/judgement_font');
+app.use('/judgement_font', judgementFontsRoute);
 
 const uploadRoute = require('./routes/upload');
 app.use('/upload', uploadRoute);

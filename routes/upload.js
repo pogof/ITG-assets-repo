@@ -34,6 +34,9 @@ const upload = multer({
 router.get('/', (_, res) => {
     res.send(`
         <html>
+        <head>
+            <link rel="stylesheet" type="text/css" href="/css/styles.css">
+        </head>
         <body>
             <form id="primaryForm">
                 <label>
@@ -65,6 +68,9 @@ router.get('/', (_, res) => {
 router.get('/judgement_font', (_, res) => {
     res.send(`
         <html>
+        <head>
+            <link rel="stylesheet" type="text/css" href="/css/styles.css">
+        </head>
         <body>
             <h1>Upload Judgement Font</h1>
             <form id="judgementFontForm" action="/upload/judgement_font" method="POST" enctype="multipart/form-data">
@@ -185,6 +191,9 @@ router.post('/judgement_font', upload.array('files'), (req, res) => {
 router.get('/noteskin', (_, res) => {
     res.send(`
         <html>
+        <head>
+            <link rel="stylesheet" type="text/css" href="/css/styles.css">
+        </head>
         <body>
             <h1>Upload Noteskin</h1>
             <form action="/upload/noteskin" method="POST" enctype="multipart/form-data">
@@ -200,6 +209,9 @@ router.get('/noteskin', (_, res) => {
 router.get('/sound_effects', (_, res) => {
     res.send(`
         <html>
+        <head>
+            <link rel="stylesheet" type="text/css" href="/css/styles.css">
+        </head>
         <body>
             <h1>Upload Sound Effects</h1>
             <form action="/upload/sound_effects" method="POST" enctype="multipart/form-data">
