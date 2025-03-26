@@ -85,7 +85,8 @@ router.get('/judgement_font', (_, res) => {
                     </div>
                 </div>
                 <button type="button" id="addFileUpload">Add Another File</button><br>
-                <label>Discord Username: <input type="text" name="discord_username" required></label><br>
+                <button type="button" id="removeFileUpload" style="display: none;">Remove Last File</button><br>
+                <label>Discord Username: <input type="text" name="discord_username"></label><br>
                 <button type="submit">Submit</button>
             </form>
             <script>
@@ -103,33 +104,31 @@ router.get('/judgement_font', (_, res) => {
                             </select>
                         </label><br>
                         <label>Has Doubleres: <input type="checkbox" name="has_doubleres"></label><br>
-                        <button type="button" class="removeFileUpload">Remove</button><br>
                     \`;
                     document.getElementById('fileUploads').appendChild(fileUploadDiv);
-                    updateRemoveButtons();
+                    updateRemoveButton();
                 });
 
-                document.getElementById('fileUploads').addEventListener('click', function(event) {
-                    if (event.target.classList.contains('removeFileUpload')) {
-                        event.target.parentElement.remove();
-                        updateRemoveButtons();
+                document.getElementById('removeFileUpload').addEventListener('click', function() {
+                    const fileUploads = document.getElementById('fileUploads');
+                    if (fileUploads.children.length > 1) {
+                        fileUploads.removeChild(fileUploads.lastChild);
                     }
+                    updateRemoveButton();
                 });
 
-                function updateRemoveButtons() {
-                    const fileUploadDivs = document.querySelectorAll('.fileUpload');
-                    fileUploadDivs.forEach((div, index) => {
-                        const removeButton = div.querySelector('.removeFileUpload');
-                        if (fileUploadDivs.length > 1) {
-                            removeButton.style.display = 'inline';
-                        } else {
-                            removeButton.style.display = 'none';
-                        }
-                    });
+                function updateRemoveButton() {
+                    const fileUploads = document.getElementById('fileUploads');
+                    const removeButton = document.getElementById('removeFileUpload');
+                    if (fileUploads.children.length > 1) {
+                        removeButton.style.display = 'inline';
+                    } else {
+                        removeButton.style.display = 'none';
+                    }
                 }
 
                 // Initial call to hide the remove button if only one upload option is present
-                updateRemoveButtons();
+                updateRemoveButton();
             </script>
         </body>
         </html>
@@ -137,26 +136,36 @@ router.get('/judgement_font', (_, res) => {
 });
 
 router.post('/judgement_font', upload.array('files'), (req, res) => {
-    const { font_name, creator, formats, has_doubleres, discord_username } = req.body;
+    const { font_name, creator, formats, discord_username } = req.body;
+    let { has_doubleres } = req.body;
     const files = req.files;
 
     if (!files || files.length === 0) {
         return res.status(400).send('No files uploaded');
     }
 
-    const folderPath = path.join(__dirname, '../not_approved/judgement_font', font_name);
+    let folderPath = path.join(__dirname, '../not_approved/judgement_font', font_name);
 
-    // Check if the folder already exists
-    if (fs.existsSync(folderPath)) {
-        return res.status(400).send('Font name with this name already exists');
+    // Check if the folder already exists in either not_approved/judgement_font or judgement_font
+    if (fs.existsSync(folderPath) || fs.existsSync(path.join(__dirname, '../judgement_font', font_name))) {
+        const randomString = Math.random().toString(36).substring(2, 9);
+        folderPath = path.join(__dirname, '../not_approved/judgement_font', `${font_name}_${randomString}`);
     }
 
     // Create the folder
     fs.mkdirSync(folderPath, { recursive: true });
 
-    // Move the uploaded files to the new folder
-    files.forEach((file) => {
-        const filePath = path.join(folderPath, file.originalname);
+    // Ensure has_doubleres is an array
+    if (!Array.isArray(has_doubleres)) {
+        has_doubleres = [has_doubleres];
+    }
+
+    // Move and rename the uploaded files to the new folder
+    files.forEach((file, index) => {
+        const format = Array.isArray(formats) ? formats[index] : formats;
+        const doubleres = has_doubleres[index] === 'on';
+        const newFileName = `${font_name} ${format}${doubleres ? ' (doubleres)' : ''}.png`;
+        const filePath = path.join(folderPath, newFileName);
         fs.renameSync(file.path, filePath);
     });
 
@@ -165,9 +174,8 @@ router.post('/judgement_font', upload.array('files'), (req, res) => {
         font_name,
         creator,
         formats: Array.isArray(formats) ? formats : [formats],
-        has_lowres: Array.isArray(has_doubleres) ? has_doubleres.map(d => !d) : [!has_doubleres],
-        has_doubleres: Array.isArray(has_doubleres) ? has_doubleres.map(d => !!d) : [!!has_doubleres],
-        discord_username
+        has_doubleres: has_doubleres.map(d => d === 'on'),
+        discord_username: discord_username || ''
     };
     fs.writeFileSync(path.join(folderPath, 'metadata.json'), JSON.stringify(metadata, null, 2));
 
