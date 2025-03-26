@@ -1,0 +1,5 @@
+.env
+node_modules/
+judgement_font/
+uploads/
+not_approved/
