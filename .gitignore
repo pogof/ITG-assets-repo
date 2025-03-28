@@ -1,5 +1,6 @@
 .env
 node_modules/
 judgement_font/
+noteskin/
 uploads/
 not_approved/

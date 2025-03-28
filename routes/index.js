@@ -1,15 +1,31 @@
 const express = require('express');
-
 const router = express.Router();
 
 router.get('/', (req, res) => {
     res.send(`
-        <h1>Welcome to ITG Assets Repository</h1>
-        <ul>
-            <li><a href="/upload">Upload Page</a></li>
-            <li><a href="/judgement_font">Judgement Font Page</a></li>
-        </ul>
+        <html>
+
+        <head>
+            <link rel="stylesheet" type="text/css" href="/css/styles.css">
+        </head>
+        
+        <body>
+            <div id="header"></div>
+            <h1>Welcome to ITG Assets Repository</h1>
+            <main class="main-container">
+            <p>Lorem ipsum dolor</p>
+            </main>
+            <footer>
+                <div id="footer"></div>
+            </footer>
+            <script src="/js/header.js"></script>
+            <script src="/js/footer.js"></script>
+            </body>
+        </html>
+
+
     `);
 });
 
 module.exports = router;
+

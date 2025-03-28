@@ -8,11 +8,20 @@ app.use('/judgement_font', express.static('judgement_font'));
 // Serve static files from the css directory
 app.use('/css', express.static('css'));
 
+// Serve static files from the js directory
+app.use('/js', express.static('js'));
+
+// Serve static files from the partials directory
+app.use('/partials', express.static('partials'));
+
 const indexRoute = require('./routes/index');
 app.use('/', indexRoute);
 
 const judgementFontsRoute = require('./routes/judgement_font');
 app.use('/judgement_font', judgementFontsRoute);
+
+const noteskinRoute = require('./routes/noteskin');
+app.use('/noteskin', noteskinRoute);
 
 const uploadRoute = require('./routes/upload');
 app.use('/upload', uploadRoute);

@@ -17,23 +17,33 @@ router.get('/', (req, res) => {
 
         let html = `
             <html>
-            <head>
-                <link rel="stylesheet" type="text/css" href="/css/styles.css">
-            </head>
-            <body>
-            <form method="GET" action="/judgement_font">
-            <input type="text" name="search" value="${searchTerm}" placeholder="Search by name">
-            <div>
-            <label>Format:</label>
-            <label><input type="checkbox" name="format" value="1x6" ${formatFilters.includes('1x6') ? 'checked' : ''}> 1x6</label>
-            <label><input type="checkbox" name="format" value="2x6" ${formatFilters.includes('2x6') ? 'checked' : ''}> 2x6</label>
-            <label><input type="checkbox" name="format" value="1x7" ${formatFilters.includes('1x7') ? 'checked' : ''}> 1x7</label>
-            <label><input type="checkbox" name="format" value="2x7" ${formatFilters.includes('2x7') ? 'checked' : ''}> 2x7</label>
-            </div>
-            <button type="submit">Search</button>
-            <button type="button" onclick="window.location.href='/judgement_font'">Remove all filters</button>
-            </form>
-            <div style="display: flex; flex-wrap: wrap;">
+                <head>
+                    <link rel="stylesheet" type="text/css" href="/css/styles.css">
+                    <script src="/js/header.js"></script>
+                    <script src="/js/footer.js"></script>
+                </head>
+
+                <body>
+                    <div id="header"></div>
+                    <h1>Judgement Fonts</h1>
+                    
+                    <div class="judgement-font-search">
+                        <form method="GET" action="/judgement_font">
+                        <input type="text" name="search" value="${searchTerm}" placeholder="Search by name">
+                            <div>
+                                <label>Format:</label>
+                                <div class="format-filters">
+                                    <label><input type="checkbox" name="format" value="1x6" ${formatFilters.includes('1x6') ? 'checked' : ''}> 1x6</label>
+                                    <label><input type="checkbox" name="format" value="2x6" ${formatFilters.includes('2x6') ? 'checked' : ''}> 2x6</label>
+                                    <label><input type="checkbox" name="format" value="1x7" ${formatFilters.includes('1x7') ? 'checked' : ''}> 1x7</label>
+                                    <label><input type="checkbox" name="format" value="2x7" ${formatFilters.includes('2x7') ? 'checked' : ''}> 2x7</label>
+                                </div>
+                            </div>
+                            <button type="submit">Search</button>
+                            <button type="button" onclick="window.location.href='/judgement_font'">Remove all filters</button>
+                        </form>
+                    </div>
+                    <div class="main-container">
         `;
 
         folders.forEach(folder => {
@@ -62,23 +72,24 @@ router.get('/', (req, res) => {
                                     <p>Font Name: ${metadata.font_name}</p>
                                     <p>Creator: ${metadata.creator}</p>
                                     <p>Format: ${metadata.formats.join(', ')}</p>
-                                    <a href="/download/${folder}" class="download-link">Download</a>
-
+                                    <a href="/judgement_font/download/${folder}" class="download-link">Download</a>
                             </div>
-
                         </div>
-
-
-
-
-
                         `;
                     }
                 }
             }
         });
 
-        html += '</div></body></html>';
+        html += `
+            </div>
+                </body>
+
+                <footer>
+                    <div id="footer"></div>
+                </footer>
+            </html>
+        `;
         res.send(html);
     });
 });
@@ -86,6 +97,10 @@ router.get('/', (req, res) => {
 router.get('/download/:folder', (req, res) => {
     const folder = req.params.folder;
     const folderPath = path.join(judgementFontPath, folder);
+
+    if (!fs.existsSync(folderPath)) {
+        return res.status(404).send('Folder not found');
+    }
 
     res.setHeader('Content-Disposition', `attachment; filename=${folder}.zip`);
     const archive = archiver('zip', {
